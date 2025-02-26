@@ -20,11 +20,11 @@ os.makedirs(labels_dir, exist_ok=True)
 os.makedirs(training_data_dir, exist_ok=True)
 
 def clear_directory(directory: Path):
-    """Remove all files in the specified directory."""
+    """Remove all files in the specified directory except .gitkeep files."""
     if directory.exists() and directory.is_dir():
         for file in directory.iterdir():
             try:
-                if file.is_file():
+                if file.is_file() and file.name != '.gitkeep':
                     file.unlink()  # Remove file
                     print(f"🗑️ Deleted file: {file}")
                 elif file.is_dir():
@@ -109,7 +109,7 @@ reset_dataset_yaml(yaml_file)
 
 # 5. Refresh labels.json
 reset_labels_json(labels_file)
-q
+
 # 6. Remove custom YOLO model file
 remove_model_file(model_file)
 
