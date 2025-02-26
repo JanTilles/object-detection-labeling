@@ -1,0 +1,17 @@
+# Ignore training data and dataset images
+training_data/
+dataset/images/
+dataset/labels/
+
+# Ignore model files
+custom_yolov8n.pt
+yolov5s.pt
+yolov5su.pt
+yolov8n.pt
+
+# Ignore cache files
+*.cache
+
+# Ignore other temporary files
+*.log
+*.tmp

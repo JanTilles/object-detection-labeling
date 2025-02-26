@@ -1,0 +1,5 @@
+names:
+  0: JT
+path: ./dataset
+train: images/train
+val: images/train
