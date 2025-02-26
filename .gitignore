@@ -18,3 +18,7 @@ yolov8n.pt
 
 # Ignore runs directory
 runs/
+
+# Ignore changes to labels.json and dataset.yaml
+labels.json
+dataset.yaml
