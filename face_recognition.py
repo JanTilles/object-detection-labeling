@@ -78,4 +78,4 @@ for label_file in os.listdir(LABEL_PATH):
 with open(OUTPUT_DB, 'wb') as f:
     pickle.dump(face_db, f)
 
-print(f'Face recognition database saved to {OUTPUT_DB}')}
+print(f'Face recognition database saved to {OUTPUT_DB}')
