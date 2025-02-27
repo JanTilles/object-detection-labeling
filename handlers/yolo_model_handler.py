@@ -3,9 +3,13 @@ import time
 import shutil
 from pathlib import Path
 from ultralytics import YOLO
+import yaml
+import json
+import cv2  # Assuming OpenCV is used for video processing
+import torch  # Assuming PyTorch is used for the model
 
 class YOLOModelHandler:
-    def __init__(self, model_path='custom_yolov8n.pt', yaml_file='dataset.yaml'):
+    def __init__(self, model_path='custom_yolov8n.pt', yaml_file='handlers/config/dataset.yaml'):
         self.model_path = model_path
         self.yaml_file = yaml_file
         self.model = self.load_model()
@@ -20,7 +24,9 @@ class YOLOModelHandler:
                 print("✅ Custom model loaded successfully.")
                 with open(self.yaml_file, 'r') as f:
                     dataset_config = yaml.safe_load(f)
-                    model.model.names = dataset_config['names']
+                    model.model.names.update(dataset_config['names'])
+                    if len(model.model.names) != model.model.nc:
+                        raise ValueError("Number of classes in dataset.yaml does not match the model's output dimensions.")
                     print(f"Model names updated: {model.model.names}")
                 return model
             except Exception as e:
@@ -40,7 +46,7 @@ class YOLOModelHandler:
         ]
         dataset_handler.move_images_and_generate_labels(classification_name, int(class_id), selected_box, frame, training_data_dir, images_dir, labels_dir)
         print("Starting model training...")
-        self.model.train(data='dataset.yaml', epochs=20, name='custom_yolo_model')
+        self.model.train(data='handlers/config/dataset.yaml', epochs=20, name='custom_yolo_model')
         print("Exporting model...")
         self.model.export(format='torchscript')
         export_path = Path("runs/detect/custom_yolo_model/weights/best.torchscript")

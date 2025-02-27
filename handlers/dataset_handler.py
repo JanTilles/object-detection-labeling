@@ -1,13 +1,15 @@
 import os
 import json
 import yaml
+import cv2
 from pathlib import Path
 
 class DatasetHandler:
-    def __init__(self, labels_file='labels.json', yaml_file='dataset.yaml'):
+    def __init__(self, labels_file='handlers/config/labels.json', yaml_file='handlers/config/dataset.yaml'):
         self.labels_file = labels_file
         self.yaml_file = yaml_file
         self.labels_db = self.load_labels()
+        self.update_yaml_file()
 
     def load_labels(self):
         if os.path.exists(self.labels_file):
@@ -21,6 +23,13 @@ class DatasetHandler:
             print("No labels.json file found. Starting with an empty labels dictionary.")
             return {}
 
+    def update_yaml_file(self):
+        with open(self.yaml_file, 'r') as file:
+            data = yaml.safe_load(file)
+        data['nc'] = len(self.labels_db)
+        with open(self.yaml_file, 'w') as file:
+            yaml.safe_dump(data, file)
+
     def update_dataset_yaml(self, new_label):
         if os.path.exists(self.yaml_file):
             with open(self.yaml_file, 'r') as f:
@@ -30,7 +39,8 @@ class DatasetHandler:
                 'path': './dataset',
                 'train': 'images/train',
                 'val': 'images/train',
-                'names': {}
+                'names': {},
+                'nc': 0
             }
 
         if new_label not in dataset_config['names'].values():
@@ -44,10 +54,16 @@ class DatasetHandler:
                 json.dump(self.labels_db, f, indent=4)
                 print(f"Updated labels.json with: {self.labels_db}")
 
+            # Update the nc field
+            dataset_config['nc'] = len(dataset_config['names'])
+
+            # Write the updated config back to the yaml file
             with open(self.yaml_file, 'w') as f:
                 yaml.safe_dump(dataset_config, f)
 
-            print(f"Updated {self.yaml_file} with new label: {new_label}")
+            print(f"✅ Added new class '{new_label}' with ID {new_class_id} to {self.yaml_file}.")
+        else:
+            print(f"Class '{new_label}' already exists in {self.yaml_file}.")
 
     def move_images_and_generate_labels(self, classification_name, class_id, selected_box, frame, training_data_dir, images_dir, labels_dir):
         image_files = list(training_data_dir.glob("*.jpg"))
@@ -79,3 +95,9 @@ class DatasetHandler:
                 label_file.write(label_data)
 
             print(f"Generated and normalized label file: {label_path} with data: {label_data}")
+
+            # Delete the processed image file from training_data_dir
+            os.remove(image_file)
+            print(f"Deleted processed image file: {image_file}")
+
+        print("Cleared training_data folder after processing images and generating labels.")

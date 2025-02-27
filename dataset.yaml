@@ -1,4 +1,0 @@
-names: {}
-path: ./dataset
-train: images/train
-val: images/train

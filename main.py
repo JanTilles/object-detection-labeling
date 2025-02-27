@@ -6,8 +6,8 @@ from handlers.yolo_model_handler import YOLOModelHandler
 from handlers.camera_handler import CameraHandler
 
 # Initialize handlers
-dataset_handler = DatasetHandler()
-yolo_model_handler = YOLOModelHandler()
+dataset_handler = DatasetHandler(labels_file='handlers/config/labels.json', yaml_file='handlers/config/dataset.yaml')
+yolo_model_handler = YOLOModelHandler(yaml_file='handlers/config/dataset.yaml')
 camera_handler = CameraHandler()
 
 training_data_dir = Path("./training_data").resolve()

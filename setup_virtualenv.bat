@@ -8,8 +8,8 @@ call myenv\Scripts\activate
 :: Upgrade pip to the latest version
 python -m pip install --upgrade pip
 
-:: Install required packages
-pip install ultralytics opencv-python-headless pyyaml
+:: Install required packages from requirements.txt
+pip install -r requirements.txt
 
 :: Deactivate the virtual environment
 deactivate
