@@ -1,11 +1,11 @@
 # Object Detection and Model Retraining Application
 
 ## Introduction
-This repository implements Python code for detecting and labeling objects in a video feed using the YOLO (You Only Look Once) object detection model. The application allows the user to select a bounding box on the video screen and press 'p' to record 10 seconds of cropped bounding box data for YOLO model retraining. After the recording phase, the code will prompt the user to enter a classification for the selected item, person, or animal.
+This repository contains Python code for detecting and labeling objects in a video feed using the YOLO (You Only Look Once) object detection model. Users can select a bounding box on the video screen and press 'p' to record 10 seconds of cropped bounding box data for YOLO model retraining. After recording, the user is prompted to enter a classification for the selected item, person, or animal.
 
 ## Key Features
-- **Real-Time Object Detection:** Utilizes the YOLOv8 model for object detection from a live video feed.
-- **Dynamic Model Retraining:** Allows the user to label detected objects and retrain the model on-the-fly.
+- **Real-Time Object Detection:** Uses the YOLOv8 model for object detection from a live video feed.
+- **Dynamic Model Retraining:** Allows users to label detected objects and retrain the model on-the-fly.
 - **Custom Object Classification:** Supports adding new custom classifications through video-based data collection.
 - **Automatic Data Management:** Manages dataset preparation, including image saving, label generation, and dataset configuration updates.
 - **Persistent Model Updates:** Saves the retrained model (`custom_yolov8n.pt`) for future use.
@@ -17,7 +17,12 @@ git clone https://github.com/your-username/object-detection-app.git
 cd object-detection-app
 ```
 
-2. **Install Required Dependencies:**
+2. **Set Up the Virtual Environment:**
+```bash
+setup_virtualenv.bat
+```
+
+3. **Install Required Dependencies:**
 ```bash
 pip install -r requirements.txt
 ```
@@ -25,7 +30,7 @@ pip install -r requirements.txt
 ## Usage
 1. **Start the Application:**
 ```bash
-python object_detection_app.py
+python main.py
 ```
 
 2. **During Video Feed:**
