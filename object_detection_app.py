@@ -8,7 +8,7 @@ import shutil
 from pathlib import Path
 
 # Paths for model and label files
-model_path = "runs/detect/weights/best.pt"  # Path to the retrained model
+model_path = "runs/detect/train/weights/best.pt"  # Path to the retrained model
 default_model_path = "yolo11n.pt"  # Path to the default YOLO model
 labels_file = 'labels.json'       # File to store custom labels
 yaml_file = 'dataset.yaml'        # Dataset configuration file
@@ -124,6 +124,20 @@ def move_images_and_generate_labels(classification_name: str, class_id: int, sel
         
         print(f"Generated and normalized label file: {label_path} with data: {label_data}")
 
+# Function to clear the training_data directory
+def clear_training_data():
+    """Remove all files in the training_data directory."""
+    for file in training_data_dir.glob("*"):
+        try:
+            if file.is_file():
+                file.unlink()  # Remove file
+                print(f"🗑️ Deleted file: {file}")
+            elif file.is_dir():
+                shutil.rmtree(file)  # Remove directory
+                print(f"🗑️ Deleted directory: {file}")
+        except Exception as e:
+            print(f"❌ Error deleting {file}: {e}")
+
 # Function to retrain the model
 def retrain_model(classification_name: str, selected_box: list, frame):
     global model  # Declare model as global at the beginning
@@ -140,20 +154,16 @@ def retrain_model(classification_name: str, selected_box: list, frame):
     # Move images and generate labels for retraining
     move_images_and_generate_labels(classification_name, int(class_id), selected_box, frame)
     
+    # Clear the training_data directory
+    clear_training_data()
+    
     # Start model training
     print("Starting model training...")
-    model.train(data='dataset.yaml', epochs=2)  # Increase epochs to 20
+    model.train(data='dataset.yaml', epochs=20)  # Increase epochs to 20
     
     # Define path for the exported model
-    export_path = Path("runs/detect/weights/best.pt")
+    export_path = Path("runs/detect/custom_yolo_model/weights/best.pt")
     
-    # Wait until the export file is ready (timeout after 30 seconds)
-    wait_time = 0
-    while not export_path.exists() and wait_time < 30:
-        print("Waiting for model export to complete...")
-        time.sleep(1)
-        wait_time += 1
-
     # Check if the export file exists
     if export_path.exists():
         print(f"✅ Model exported and saved as {export_path}")
@@ -161,7 +171,7 @@ def retrain_model(classification_name: str, selected_box: list, frame):
         model = YOLO(export_path)
         print("✅ Retrained model loaded successfully.")
     else:
-        print(f"❌ Error: Model export failed. File not found at {export_path} after waiting {wait_time} seconds.")
+        print(f"❌ Error: Model export failed. File not found at {export_path}.")
 
 # Validate model file and load the YOLO model
 if os.path.exists(model_path) and model_path.endswith('.pt'):
@@ -188,11 +198,6 @@ if os.path.exists(model_path) and model_path.endswith('.pt'):
 else:
     print("Custom model not found or invalid format. Loading default YOLOv11 model.")
     model = YOLO(default_model_path)
-    # Update model names with labels from dataset.yaml not needed when loading default model
-    #with open(yaml_file, 'r') as f:
-    #    dataset_config = yaml.safe_load(f)
-    #    model.names = dataset_config['names']
-    #    print(f"Model names updated: {model.names}")
 
 
 # Initialize the camera
@@ -206,7 +211,7 @@ camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)  # Original 480
 camera.set(cv2.CAP_PROP_BRIGHTNESS, 200)  # Adjust brightness (0-255)
 camera.set(cv2.CAP_PROP_CONTRAST, 50)     # Adjust contrast (0-255)
 camera.set(cv2.CAP_PROP_SATURATION, 50)   # Adjust saturation (0-255)
-camera.set(cv2.CAP_PROP_EXPOSURE, -4)     # Adjust exposure (-1 to -13 for webcams)
+camera.set(cv2.CAP_PROP_EXPOSURE, -1)     # Adjust exposure (-1 to -13 for webcams)
 
 recording = False
 selected_box = None
