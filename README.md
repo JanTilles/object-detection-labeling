@@ -41,7 +41,7 @@ python object_detection_app.py
 3. Provide a custom label for the object when prompted.
 4. The application updates the `dataset.yaml` and `labels.json` files.
 5. The YOLO model is retrained using the new labeled data.
-6. The updated model is saved as `custom_yolov8n.pt`.
+6. The updated model is saved as in `runs/detect/train/weights`.
 7. The application restarts using the retrained model for improved detection.
 
 ## Resetting the Environment
