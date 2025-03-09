@@ -1,4 +1,5 @@
-names: {}
+names:
+  0: Jan
 path: ./dataset
 train: images/train
 val: images/train

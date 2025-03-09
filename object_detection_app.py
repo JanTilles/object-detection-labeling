@@ -8,7 +8,8 @@ import shutil
 from pathlib import Path
 
 # Paths for model and label files
-model_path = "custom_yolov8n.pt"  # Custom retrained model path
+model_path = "runs/detect/weights/best.pt"  # Path to the retrained model
+default_model_path = "yolo11n.pt"  # Path to the default YOLO model
 labels_file = 'labels.json'       # File to store custom labels
 yaml_file = 'dataset.yaml'        # Dataset configuration file
 
@@ -125,6 +126,7 @@ def move_images_and_generate_labels(classification_name: str, class_id: int, sel
 
 # Function to retrain the model
 def retrain_model(classification_name: str, selected_box: list, frame):
+    global model  # Declare model as global at the beginning
     print(f"Retraining model with new label: {classification_name}")
     
     # Load dataset configuration and determine class ID
@@ -140,15 +142,10 @@ def retrain_model(classification_name: str, selected_box: list, frame):
     
     # Start model training
     print("Starting model training...")
-    model.train(data='dataset.yaml', epochs=20, name='custom_yolo_model')  # Increase epochs to 20
+    model.train(data='dataset.yaml', epochs=2)  # Increase epochs to 20
     
-    # Export the model using 'torchscript' format
-    print("Exporting model...")
-    model.export(format='torchscript')
-    
-    # Define paths for the exported and final model
-    export_path = Path("runs/detect/custom_yolo_model/weights/best.torchscript")
-    final_model_path = Path("custom_yolov8n.pt")  # Ensure .pt extension for consistency
+    # Define path for the exported model
+    export_path = Path("runs/detect/weights/best.pt")
     
     # Wait until the export file is ready (timeout after 30 seconds)
     wait_time = 0
@@ -157,16 +154,14 @@ def retrain_model(classification_name: str, selected_box: list, frame):
         time.sleep(1)
         wait_time += 1
 
-    # Move the exported model to the final model path
+    # Check if the export file exists
     if export_path.exists():
-        shutil.copy(export_path, final_model_path)
-        print(f"✅ Model exported and saved as {final_model_path}")
+        print(f"✅ Model exported and saved as {export_path}")
+        # Load the retrained model
+        model = YOLO(export_path)
+        print("✅ Retrained model loaded successfully.")
     else:
         print(f"❌ Error: Model export failed. File not found at {export_path} after waiting {wait_time} seconds.")
-    
-    # Save the model correctly in the .pt format
-    model.save(final_model_path)
-    print(f"✅ Model saved correctly as {final_model_path}")
 
 # Validate model file and load the YOLO model
 if os.path.exists(model_path) and model_path.endswith('.pt'):
@@ -188,11 +183,11 @@ if os.path.exists(model_path) and model_path.endswith('.pt'):
         
     except Exception as e:
         print(f"❌ Failed to load custom model: {e}")
-        print("Loading default YOLOv8 model instead...")
-        model = YOLO("yolov8n.pt")
+        print("Loading default YOLOv11 model instead...")
+        model = YOLO(default_model_path)
 else:
-    print("Custom model not found or invalid format. Loading default YOLOv8 model.")
-    model = YOLO("yolov8n.pt")
+    print("Custom model not found or invalid format. Loading default YOLOv11 model.")
+    model = YOLO(default_model_path)
     # Update model names with labels from dataset.yaml not needed when loading default model
     #with open(yaml_file, 'r') as f:
     #    dataset_config = yaml.safe_load(f)
@@ -204,11 +199,11 @@ else:
 camera = cv2.VideoCapture(0)
 
 # Set camera resolution
-camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)  # Original 640
-camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)  # Original 480
+camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)  # Original 640
+camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)  # Original 480
 
 # Set additional camera settings for better picture quality
-camera.set(cv2.CAP_PROP_BRIGHTNESS, 150)  # Adjust brightness (0-255)
+camera.set(cv2.CAP_PROP_BRIGHTNESS, 200)  # Adjust brightness (0-255)
 camera.set(cv2.CAP_PROP_CONTRAST, 50)     # Adjust contrast (0-255)
 camera.set(cv2.CAP_PROP_SATURATION, 50)   # Adjust saturation (0-255)
 camera.set(cv2.CAP_PROP_EXPOSURE, -4)     # Adjust exposure (-1 to -13 for webcams)
